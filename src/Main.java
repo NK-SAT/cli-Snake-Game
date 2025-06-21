@@ -1,55 +1,93 @@
 import java.util.*;
-
 public class Main {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
-        ArrayList<Snake> snakes = new ArrayList<>();
-        int moves = 0;
-        System.out.println("Let's Begin the Game... so Enter the size of the matrix");
+        Queue<Snake> snakeBody = new LinkedList<>();
+
+        System.out.println("Enter matrix size:");
         int n = in.nextInt();
+        int count = 0;
         char[][] matrix = new char[n][n];
 
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix.length; j++) {
-                matrix[i][j] = '-';
-                System.out.print(matrix[i][j] + " ");
-            }
-            System.out.println();
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(matrix[i], '-');
         }
+
         boolean enter = true;
-        while(enter){
-            System.out.println("\nPress 1 if you want to add Fruit \nPress 2 to start the gamee...");
-            int chosen = in.nextInt();
-            switch (chosen){
+        while (enter) {
+            System.out.println("\n1: Add Fruit\n2: Start Game");
+            int choice = in.nextInt();
+            switch (choice) {
                 case 1:
-                    System.out.println("Enter the Index to give fruitss...");
-                    moves++;
-                    int curri = in.nextInt();
-                    int currj = in.nextInt();
-                    if(curri>n-1 || curri <0 || currj>n-1 ||currj<0){
-                        System.out.println("Its out of the game. Give a valid index, yaar!!");
-                        break;
+                    System.out.println("Enter fruit position (i j):");
+                    int fi = in.nextInt(), fj = in.nextInt();
+                    if (fi < 0 || fj < 0 || fi >= n || fj >= n) {
+                        System.out.println("Invalid index");
+                    } else {
+                        matrix[fi][fj] = 'F';
+                        count++;
                     }
-                    matrix[curri][currj]='F';
                     break;
                 case 2:
                     enter = false;
                     break;
                 default:
-                    System.out.println("You have entered a invalid input enter a proper one.");
+                    System.out.println("Invalid choice");
             }
-            for (int i = 0; i < matrix.length; i++) {
-                for (int j = 0; j < matrix.length; j++) {
-                    System.out.print(matrix[i][j] + " ");
-                }
-                System.out.println();
+
+            printMatrix(matrix);
+        }
+
+        System.out.println("Enter Snake start position (i j):");
+        int si = in.nextInt(), sj = in.nextInt();
+        matrix[si][sj] = '*';
+        snakeBody.add(new Snake(si, sj));
+        printMatrix(matrix);
+        boolean gameOver = false;
+        while (!gameOver) {
+            System.out.println("\nMove: U / D / L / R");
+            char dir = in.next().toUpperCase().charAt(0);
+
+            int ni = si, nj = sj;
+            switch (dir) {
+                case 'U': ni--; break;
+                case 'D': ni++; break;
+                case 'L': nj--; break;
+                case 'R': nj++; break;
+                default:
+                    System.out.println("Invalid direction"); continue;
+            }
+
+            if (ni < 0 || nj < 0 || ni >= n || nj >= n || matrix[ni][nj] == '*') {
+                System.out.println("Game Over!");
+                break;
+            }
+
+            if (matrix[ni][nj] == 'F') {
+                count--;
+                snakeBody.add(new Snake(ni, nj));
+            } else {
+                Snake tail = snakeBody.poll();
+                matrix[tail.getIndexi()][tail.getIndexj()] = '-';
+                snakeBody.add(new Snake(ni, nj));
+            }
+
+            matrix[ni][nj] = '*';
+            si = ni;
+            sj = nj;
+
+            printMatrix(matrix);
+            if(count == 0){
+                System.out.println("You won the Game!!!");
+                gameOver = true;
             }
         }
-        System.out.println("Where you want to start with the snake???");
-        int curri = in.nextInt();
-        int currj = in.nextInt();
-        matrix[curri][currj] = '*';
-        boolean over = false;
+    }
 
+    public static void printMatrix(char[][] matrix) {
+        for (char[] row : matrix) {
+            for (char cell : row) System.out.print(cell + " ");
+            System.out.println();
+        }
     }
 }
